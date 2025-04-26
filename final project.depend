@@ -1,0 +1,63 @@
+# depslib dependency file v1.0
+1713928142 source:c:\users\murat\onedrive\desktop\final project\main.c
+	<stdio.h>
+	<stdlib.h>
+	<pthread.h>
+	<string.h>
+	<unistd.h>
+
+1713496486 source:c:\users\murat\onedrive\desktop\final project\crawler.c
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\curl.h
+	"curlver.h"
+	"system.h"
+	<stdio.h>
+	<limits.h>
+	<sys/param.h>
+	<sys/types.h>
+	<time.h>
+	<winsock2.h>
+	<ws2tcpip.h>
+	<sys/select.h>
+	<sys/socket.h>
+	<sys/time.h>
+	"easy.h"
+	"multi.h"
+	"urlapi.h"
+	"options.h"
+	"header.h"
+	"websockets.h"
+	"mprintf.h"
+	"typecheck-gcc.h"
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\curlver.h
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\system.h
+	<ConditionalMacros.h>
+	<inttypes.h>
+	<inttypes.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<sys/poll.h>
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\easy.h
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\multi.h
+	"curl.h"
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\urlapi.h
+	"curl.h"
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\options.h
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\header.h
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\websockets.h
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\mprintf.h
+	<stdarg.h>
+	<stdio.h>
+	"curl.h"
+
+1713492477 c:\users\murat\downloads\curl-8.7.1_7-win64-mingw\curl-8.7.1_7-win64-mingw\include\curl\typecheck-gcc.h
+
