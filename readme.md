@@ -4,11 +4,11 @@
 - Jose Santos(RUID: (225009670), Dhruvi)l Patel (RUID: 200006142), Almuatasam Asseadi (RUID: )
 
 ##Roles of group members : 
-- Jose Santos (, Marcos Santana (Error handling), Dhruvil Patel (Logging, Thread management, URL Queue, HTML Parsing, Depth control,Synchronization)
+- Jose (HTML Storage, Depth control, Word Searching, Thread management), Almuatasam Asseadi (Error handling), Dhruvil Patel (Logging, URL Queue, Synchronization)
 - it is worth noting that even though we did specific parts of the code apart, the whole code was written in cohesion, Everyone contributed in some shape to all of the written code, even if they are not directly responsible for it.
 
 ## Description
-This web crawler is a multithreaded application designed to fetch HTML content from web pages, extract links, and log the process to a file. It is implemented in C programming language and utilizes pthreads for multithreading and libcurl for handling HTTP requests.
+This web crawler is a multithreaded application designed to fetch HTML content from web pages, extract links, and log the process to a file. Then take a data set of important words and count how many occurences. It is implemented in C programming language and utilizes pthreads for multithreading and libcurl for handling HTTP requests.
 
 ### Architecture
 The web crawler consists of several components:
@@ -16,12 +16,13 @@ The web crawler consists of several components:
 - **URL Queue**: A thread-safe FIFO queue implemented using a circular buffer to store URLs waiting to be fetched.
 - **URL Fetching Threads**: Multiple threads are created to fetch URLs from the queue, download HTML content using libcurl, parse the content to extract links, and log the process.
 - **Logging**: The crawler logs the fetching process, HTML content, and extracted links to a specified log file.
+- **Word Counting**: Take all content in the html file, make all words lowercase, match each word to the set of important words, and increment count per word found
 
 ### Multithreading Approach
 The crawler adopts a multithreading approach to improve efficiency by fetching multiple URLs concurrently. It uses pthreads for thread management and synchronization. Each fetching thread dequeues a URL from the URL queue, fetches its content, extracts links, and logs the process. The main program creates and joins threads, ensuring proper synchronization and resource management.
 
 ### Specific Roles and Contributions
-- **Murathan Saylan**: Implemented the main program, URL queue, URL fetching threads, logging mechanism, and overall project organization. Conducted testing and debugging to ensure functionality and correctness.
+- **Jose Santos**: Implemented the main program, URL queue, URL fetching threads, word finding, logging mechanism, and overall project organization. Conducted testing and debugging to ensure functionality and correctness.
 
 ### Libraries Used
 - **pthread**: Used for multithreading and thread synchronization.
