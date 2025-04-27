@@ -1,10 +1,12 @@
 # Web Crawler README
 
 ## Group Members
-- Jose Santos(RUID: (225009670), Dhruvi)l Patel (RUID: 200006142), Almuatasam Asseadi (RUID: )
+- Jose Santos(RUID: (225009670), Dhruvi)l Patel (RUID: 200006142), Almuatasam Asseadi (RUID: 211005266)
 
 ##Roles of group members : 
-- Jose (HTML Storage, Depth control, Word Searching, Thread management), Almuatasam Asseadi (Error handling), Dhruvil Patel (Logging, URL Queue, Synchronization)
+- Jose (HTML Storage, Depth control, Word Searching, Thread management).
+- Almuatasam Asseadi (Error handling). 
+- Dhruvil Patel (Logging, URL Queue, Synchronization)
 - it is worth noting that even though we did specific parts of the code apart, the whole code was written in cohesion, Everyone contributed in some shape to all of the written code, even if they are not directly responsible for it.
 
 ## Description
@@ -23,6 +25,8 @@ The crawler adopts a multithreading approach to improve efficiency by fetching m
 
 ### Specific Roles and Contributions
 - **Jose Santos**: Implemented the main program, URL queue, URL fetching threads, word finding, logging mechanism, and overall project organization. Conducted testing and debugging to ensure functionality and correctness.
+- **Dhruvil Patel**: Developed the logging system, designed and managed the URL queue structure, and implemented synchronization between threads to ensure safe access to shared resources. Supported the stability of the program by handling concurrency issues and helped with debugging related to multi-threading and logging events.
+- **Almuatasam Asseadi**: Implemented comprehensive error handling across the program, including invalid URLs, network failures, and file access errors. Ensured the crawler could handle unexpected failures gracefully without crashing and contributed to improving the overall reliability and robustness of the project.
 
 ### Libraries Used
 - **pthread**: Used for multithreading and thread synchronization.

@@ -1,43 +1,50 @@
+// Tell compiler to use POSIX.1-2008 and later for APIs like pthreads
 #define _POSIX_C_SOURCE 200809L
+// Standard libraries needed for I/O, memory management, string handling, multithreading, etc.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <curl/curl.h>
-#include <ctype.h>
-#include <time.h>
+#include <curl/curl.h> // for downloading web pages
+#include <ctype.h>  // for character handling functions like tolower
+#include <time.h> // for timestamping or time functions (if used)
 
-#define BASE_URL "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
-#define MAX_URL_LENGTH 1000
-#define MAX_DEPTH 200
-#define MAX_THREADS 10
-#define LOG_FILE "crawler_log.txt"
-#define URLS_FILE "urls.txt"
-
+// Constants for basic settings
+#define BASE_URL "https://books.toscrape.com/catalogue/category/books/travel_2/index.html" // Website to start crawling
+#define MAX_URL_LENGTH 1000 // Maximum length of a URL string
+#define MAX_DEPTH 200 // Maximum depth for recursive crawling
+#define MAX_THREADS 10 // Number of threads for parallel crawling
+#define LOG_FILE "crawler_log.txt" // Log file name
+#define URLS_FILE "urls.txt" // File to save visited URLs
+// Limit for number of URLs per depth
 #define MAX_URLS_PER_DEPTH 10
 #define MAX_URLS_PER_DEPTH 200
 
+// Important words to search for inside the HTML pages
 const char *important_words[] = {"data", "algorithm", "math", "generate", "link", "information"};
 const int word_count = sizeof(important_words) / sizeof(important_words[0]);
 
+// Structure to store a URL along with its crawl depth
 typedef struct {
     char url[MAX_URL_LENGTH];
     int depth;
 } URL;
 
+// Structure to represent a thread-safe queue for URLs
 typedef struct {
-    URL data[MAX_URL_LENGTH];
-    int front, rear;
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
+    URL data[MAX_URL_LENGTH]; // Array of URLs
+    int front, rear; // Indices for front and rear of the queue
+    pthread_mutex_t lock; // Mutex for thread-safe access
+    pthread_cond_t cond; // Condition variable for thread waiting
 } URLQueue;
 
+// Global variables for the crawler
 URLQueue urlQueue;
 pthread_t threads[MAX_THREADS];
 FILE *logFile;
 FILE *urlsFile;
-int done = 0;
+int done = 0;    // Flag to indicate if crawling is done
 pthread_mutex_t done_lock = PTHREAD_MUTEX_INITIALIZER;
 int urls_per_depth[MAX_DEPTH];
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -47,12 +54,20 @@ char *visited_urls[MAX_URL_LENGTH];
 int visited_count = 0;
 pthread_mutex_t visited_lock = PTHREAD_MUTEX_INITIALIZER;
 
+/**
+ * Initializes a URL queue by setting the front and rear to -1 and
+ * initializing its mutex and condition variable.
+ */
 void initQueue(URLQueue *queue) {
     queue->front = queue->rear = -1;
     pthread_mutex_init(&queue->lock, NULL);
     pthread_cond_init(&queue->cond, NULL);
 }
 
+/**
+ * Saves the HTML content of a page to a local file (page_X.html) where X is the index.
+ * Logs success or error information into the log file.
+ */
 void save_html(const char *html_content, int index, const char *url) {
     if (!html_content) {
         pthread_mutex_lock(&print_lock);
@@ -63,17 +78,21 @@ void save_html(const char *html_content, int index, const char *url) {
         return;
     }
     char filename[100];
-    snprintf(filename, sizeof(filename), "page_%d.html", index);
+    snprintf(filename, sizeof(filename), "page_%d.html", index); // Generate filename
     FILE *file = fopen(filename, "w");
+
     if (file) {
+        // Save the content to file
         fprintf(file, "%s", html_content);
         fclose(file);
+         // Log the successful save
         pthread_mutex_lock(&print_lock);
         printf("HTML content saved to %s for URL: %s\n", filename, url);
         fprintf(logFile, "HTML content saved to %s for URL: %s\n", filename, url);
         fflush(logFile);
         pthread_mutex_unlock(&print_lock);
     } else {
+        // Log any file opening error
         pthread_mutex_lock(&print_lock);
         perror("Error opening output file");
         fprintf(logFile, "Error opening output file: %s for URL: %s\n", filename, url);
@@ -82,6 +101,10 @@ void save_html(const char *html_content, int index, const char *url) {
     }
 }
 
+/**
+ * Finds and counts occurrences of important words in the HTML content.
+ * It prints and logs how many times each important word appears on a page.
+ */
 void word_finder(const char *html_content, int page_index, const char *url) {
     if (!html_content) {
         pthread_mutex_lock(&print_lock);
@@ -92,7 +115,9 @@ void word_finder(const char *html_content, int page_index, const char *url) {
         return;
     }
     int count[word_count];
-    memset(count, 0, sizeof(count));
+    memset(count, 0, sizeof(count)); // Initialize count array to 0
+
+    // Make a lowercase copy of the HTML content to make search case-insensitive
     char *lowercase_content = strdup(html_content);
     if (!lowercase_content) {
         pthread_mutex_lock(&print_lock);
@@ -102,15 +127,18 @@ void word_finder(const char *html_content, int page_index, const char *url) {
         pthread_mutex_unlock(&print_lock);
         return;
     }
+     // Convert all characters to lowercase
     for (char *p = lowercase_content; *p; ++p) {
         *p = tolower(*p);
     }
+     // Count occurrences of each important word
     for (int i = 0; i < word_count; i++) {
         char *ptr = lowercase_content;
         while ((ptr = strstr(ptr, important_words[i])) != NULL) {
             int word_len = strlen(important_words[i]);
             char before = (ptr == lowercase_content) ? ' ' : *(ptr - 1);
             char after = ptr[word_len];
+            // Check if the word is not part of another word (by checking surrounding characters)
             if ((before == ' ' || ispunct(before) || before == '\n' || before == '\t') &&
                 (after == ' ' || ispunct(after) || after == '\n' || after == '\t' || after == '\0')) {
                 count[i]++;
@@ -118,6 +146,7 @@ void word_finder(const char *html_content, int page_index, const char *url) {
             ptr += word_len;
         }
     }
+    // Print and log the word counts
     pthread_mutex_lock(&print_lock);
     printf("Word counts for page_%d (URL: %s):\n", page_index, url);
     fprintf(logFile, "Word counts for page_%d (URL: %s):\n", page_index, url);
@@ -129,19 +158,25 @@ void word_finder(const char *html_content, int page_index, const char *url) {
     fprintf(logFile, "--- End of word counts for page_%d ---\n", page_index);
     fflush(logFile);
     pthread_mutex_unlock(&print_lock);
-    free(lowercase_content);
+    free(lowercase_content); // Free allocated memory
 }
-
+/**
+ * Saves a URL into the "urls.txt" file in a thread-safe way.
+ */
 void save_url_to_file(const char *url) {
     pthread_mutex_lock(&urls_file_lock);
     fprintf(urlsFile, "%s\n", url);
     fflush(urlsFile);
     pthread_mutex_unlock(&urls_file_lock);
 }
-
+/**
+ * Adds a URL to the URL queue in a thread-safe manner.
+ * If the queue is full, logs an error and discards the URL.
+ */
 void enqueue(URLQueue *queue, const URL *url) {
     pthread_mutex_lock(&queue->lock);
     if (queue->rear == MAX_URL_LENGTH - 1) {
+        // Queue is full; cannot enqueue
         pthread_mutex_unlock(&queue->lock);
         pthread_mutex_lock(&print_lock);
         fprintf(logFile, "Queue full, cannot enqueue URL: %s\n", url->url);
@@ -152,15 +187,24 @@ void enqueue(URLQueue *queue, const URL *url) {
     if (queue->front == -1)
         queue->front = 0;
     queue->rear++;
-    queue->data[queue->rear] = *url;
-    pthread_cond_signal(&queue->cond);
+    queue->data[queue->rear] = *url; // Copy the URL into the queue
+    pthread_cond_signal(&queue->cond);  // Wake up any thread waiting for URLs
     pthread_mutex_unlock(&queue->lock);
 }
 
+/**
+ * Checks if the URL queue is empty.
+ * Returns 1 (true) if empty, otherwise 0 (false).
+ */
 int isEmpty(URLQueue *queue) {
     return queue->front == -1 || queue->front > queue->rear;
 }
 
+/**
+ * Dequeues a URL from the front of the URL queue in a thread-safe way.
+ * If queue is empty and crawling is done, returns an empty URL struct.
+ * Otherwise, waits until a URL is available.
+ */
 URL dequeue(URLQueue *queue) {
     pthread_mutex_lock(&queue->lock);
     while (isEmpty(queue)) {
@@ -168,17 +212,21 @@ URL dequeue(URLQueue *queue) {
         if (done) {
             pthread_mutex_unlock(&done_lock);
             pthread_mutex_unlock(&queue->lock);
-            URL empty_url = {{0}, 0};
+            URL empty_url = {{0}, 0}; // Return empty URL
             return empty_url;
         }
         pthread_mutex_unlock(&done_lock);
-        pthread_cond_wait(&queue->cond, &queue->lock);
+        pthread_cond_wait(&queue->cond, &queue->lock); // Wait until URL is available
     }
     URL url = queue->data[queue->front++];
     pthread_mutex_unlock(&queue->lock);
     return url;
 }
 
+/**
+ * Callback function used by libcurl to write the downloaded HTML data into memory.
+ * Handles initial memory allocation and reallocation when more data arrives.
+ */
 size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userp) {
     size_t totalSize = size * nmemb;
     char **html = (char **)userp;
@@ -216,6 +264,11 @@ size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userp) {
     return totalSize;
 }
 
+/**
+ * Thread function for fetching and processing URLs.
+ * Each thread continuously dequeues URLs, fetches HTML content, processes the page,
+ * extracts new links, saves results, and enqueues new URLs to be crawled.
+ */
 void *fetchURL(void *arg) {
     static int page_counter = 1;
     static pthread_mutex_t counter_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -223,7 +276,7 @@ void *fetchURL(void *arg) {
     while (1) {
         URL url = dequeue(&urlQueue);
         if (url.url[0] == '\0') {
-            break;
+            break; // Exit if no more URLs and done flag set
         }
         pthread_mutex_lock(&print_lock);
         printf("Fetching URL: %s (Depth: %d)\n", url.url, url.depth);
@@ -260,11 +313,13 @@ void *fetchURL(void *arg) {
                     pthread_mutex_unlock(&print_lock);
 
                     // Save the URL to urls.txt
+                    // Save URL and page contents
                     save_url_to_file(url.url);
 
                     save_html(html_content, current_page, url.url);
                     word_finder(html_content, current_page, url.url);
 
+                    // Extract and handle links
                     char *html_lower = strdup(html_content);
                     if (!html_lower) {
                         pthread_mutex_lock(&print_lock);
@@ -296,6 +351,7 @@ void *fetchURL(void *arg) {
                                 fflush(logFile);
                                 pthread_mutex_unlock(&print_lock);
 
+                                // Build new full URL
                                 URL new_url;
                                 char base_domain[MAX_URL_LENGTH];
                                 char relative_base[MAX_URL_LENGTH];
@@ -327,12 +383,14 @@ void *fetchURL(void *arg) {
                                 }
 
                                 // Compute the relative base from the current URL
+                                // Calculate relative base
                                 strncpy(relative_base, url.url, MAX_URL_LENGTH);
                                 char *last_slash = strrchr(relative_base, '/');
                                 if (last_slash) {
                                     *last_slash = '\0'; // Remove the last component (e.g., index.html)
                                 }
 
+                                // Handle absolute vs relative URLs
                                 if (strncmp(link, "http", 4) == 0) {
                                     if (strlen(link) < MAX_URL_LENGTH) {
                                         if (strncmp(link, base_domain, strlen(base_domain)) != 0) {
@@ -371,6 +429,7 @@ void *fetchURL(void *arg) {
                                     continue;
                                 }
 
+                                // Check if URL already visited
                                 pthread_mutex_lock(&visited_lock);
                                 int is_visited = 0;
                                 for (int i = 0; i < visited_count; i++) {
@@ -389,6 +448,7 @@ void *fetchURL(void *arg) {
                                     continue;
                                 }
 
+                                // Enqueue new URL
                                 pthread_mutex_lock(&urls_per_depth_lock);
                                 if (urls_per_depth[new_url.depth] >= MAX_URLS_PER_DEPTH) {
                                     pthread_mutex_unlock(&urls_per_depth_lock);
@@ -421,6 +481,7 @@ void *fetchURL(void *arg) {
             }
         }
 
+        // Small sleep to prevent aggressive resource usage
         struct timespec ts = {0, 100000000};
         nanosleep(&ts, NULL);
 
@@ -435,6 +496,10 @@ void *fetchURL(void *arg) {
     return NULL;
 }
 
+/**
+ * Main crawling function: starts threads, initializes the queue,
+ * enqueues the starting URL, and waits for all threads to complete.
+ */
 void crawl() {
     URL start;
     strncpy(start.url, BASE_URL, MAX_URL_LENGTH);
@@ -451,6 +516,11 @@ void crawl() {
     }
 }
 
+/**
+ * Main function.
+ * Opens log and URLs files, initializes CURL, starts crawling,
+ * and cleans up all allocated resources afterward.
+ */
 int main(int argc, char *argv[]) {
     logFile = fopen(LOG_FILE, "a");
     if (!logFile) {
