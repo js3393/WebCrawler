@@ -1,10 +1,10 @@
 # Web Crawler README
 
 ## Group Members
-- Jose Santos(RUID: (225009670), Dhruvi)l Patel (RUID: 200006142)
+- Jose Santos(RUID: (225009670), Dhruvi)l Patel (RUID: 200006142), Almuatasam Asseadi (RUID: )
 
 ##Roles of group members : 
-- Murathan Saylan (Thread management, URL Queue, HTML Parsing, Depth control,Synchronization), Marcos Santana (Error handling), Dhruvil Patel (Logging)
+- Jose Santos (, Marcos Santana (Error handling), Dhruvil Patel (Logging, Thread management, URL Queue, HTML Parsing, Depth control,Synchronization)
 - it is worth noting that even though we did specific parts of the code apart, the whole code was written in cohesion, Everyone contributed in some shape to all of the written code, even if they are not directly responsible for it.
 
 ## Description

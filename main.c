@@ -14,7 +14,7 @@
 #define MAX_THREADS 10
 #define LOG_FILE "crawler_log.txt"
 #define URLS_FILE "urls.txt"
-#define MAX_URLS_PER_DEPTH 2
+#define MAX_URLS_PER_DEPTH 10
 
 const char *important_words[] = {"data", "algorithm", "math", "generate", "link", "information"};
 const int word_count = sizeof(important_words) / sizeof(important_words[0]);
