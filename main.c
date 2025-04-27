@@ -8,13 +8,13 @@
 #include <ctype.h>
 #include <time.h>
 
-#define BASE_URL "https://books.toscrape.com/"
+#define BASE_URL "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
 #define MAX_URL_LENGTH 1000
-#define MAX_DEPTH 2
+#define MAX_DEPTH 200
 #define MAX_THREADS 10
 #define LOG_FILE "crawler_log.txt"
 #define URLS_FILE "urls.txt"
-#define MAX_URLS_PER_DEPTH 2
+#define MAX_URLS_PER_DEPTH 200
 
 const char *important_words[] = {"data", "algorithm", "math", "generate", "link", "information"};
 const int word_count = sizeof(important_words) / sizeof(important_words[0]);
