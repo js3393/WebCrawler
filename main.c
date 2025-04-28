@@ -18,7 +18,6 @@
 #define LOG_FILE "crawler_log.txt" // Log file name
 #define URLS_FILE "urls.txt" // File to save visited URLs
 // Limit for number of URLs per depth
-#define MAX_URLS_PER_DEPTH 10
 #define MAX_URLS_PER_DEPTH 200
 
 // Important words to search for inside the HTML pages
