@@ -24,7 +24,7 @@
 const char *important_words[] = {"data", "algorithm", "math", "generate", "link", "information"};
 const int word_count = sizeof(important_words) / sizeof(important_words[0]);
 
-// Structure to store a URL along with its crawl depth
+// Structure to store a URL along with its crawl depth 
 typedef struct {
     char url[MAX_URL_LENGTH];
     int depth;
@@ -33,14 +33,14 @@ typedef struct {
 // Structure to represent a thread-safe queue for URLs
 typedef struct {
     URL data[MAX_URL_LENGTH]; // Array of URLs
-    int front, rear; // Indices for front and rear of the queue
-    pthread_mutex_t lock; // Mutex for thread-safe access
-    pthread_cond_t cond; // Condition variable for thread waiting
+    int front, rear; // Tracks indices for front and rear of the queue
+    pthread_mutex_t lock; // Mutex for thread-safe access ensures one thread mutates at a time
+    pthread_cond_t cond; // Condition variable for thread waiting when queue is empty until new URL arrives
 } URLQueue;
 
 // Global variables for the crawler
 URLQueue urlQueue;
-pthread_t threads[MAX_THREADS];
+pthread_t threads[MAX_THREADS]; //pThread IDs
 FILE *logFile;
 FILE *urlsFile;
 int done = 0;    // Flag to indicate if crawling is done
