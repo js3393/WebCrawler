@@ -13,15 +13,15 @@
 // Constants for basic settings
 #define BASE_URL "https://books.toscrape.com/catalogue/category/books/travel_2/index.html" // Website to start crawling
 #define MAX_URL_LENGTH 1000 // Maximum length of a URL string
-#define MAX_DEPTH 200 // Maximum depth for recursive crawling
+#define MAX_DEPTH 2 // Maximum depth for recursive crawling
 #define MAX_THREADS 10 // Number of threads for parallel crawling
 #define LOG_FILE "crawler_log.txt" // Log file name
 #define URLS_FILE "urls.txt" // File to save visited URLs
 // Limit for number of URLs per depth
-#define MAX_URLS_PER_DEPTH 200
+#define MAX_URLS_PER_DEPTH 5
 
 // Important words to search for inside the HTML pages
-const char *important_words[] = {"data", "algorithm", "math", "generate", "link", "information"};
+const char *important_words[] = {"data", "star", "math", "generate", "link", "information"};
 const int word_count = sizeof(important_words) / sizeof(important_words[0]);
 
 // Structure to store a URL along with its crawl depth 
